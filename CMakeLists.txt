@@ -7,6 +7,12 @@ endif(COMMAND cmake_policy)
 
 project(Serial)
 
+# Use clang if available
+IF(EXISTS /usr/bin/clang)
+  set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+  set(CMAKE_C_COMPILER /usr/bin/clang)
+ENDIF(EXISTS /usr/bin/clang)
+
 ## Configurations
 
 option(SERIAL_BUILD_TESTS "Build all of the Serial tests." OFF)

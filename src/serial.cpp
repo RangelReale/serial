@@ -476,7 +476,7 @@ flowcontrol_t Serial::getFlowcontrol() const {
 
 bool Serial::startContinuousRead(unsigned int bufferSize) {
     // make sure buffer size is > 0
-    if (bufferSize<0) {
+    if (bufferSize<1) {
         std::cout << "Serial: Buffer size must be > 0." << std::endl;
     } else {
         this->bufferSize=bufferSize;
