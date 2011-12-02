@@ -49,28 +49,28 @@ public:
     boost::system::error_code store(BOOST_ASIO_OPTION_STORAGE& storage,
                                     boost::system::error_code& ec) const
     {
-        #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
-            if(m_enable)
-                storage.fDtrControl = DTR_CONTROL_ENABLE;
-            else
-                storage.fDtrControl = DTR_CONTROL_DISABLE;
-        #else
-            ec = boost::asio::error::operation_not_supported;
-            ec = boost::system::error_code();
-        #endif
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+        if(m_enable)
+            storage.fDtrControl = DTR_CONTROL_ENABLE;
+        else
+            storage.fDtrControl = DTR_CONTROL_DISABLE;
+#else
+        ec = boost::asio::error::operation_not_supported;
+        ec = boost::system::error_code();
+#endif
         return ec;
     };
     
     boost::system::error_code load(const BOOST_ASIO_OPTION_STORAGE& storage,
                                    boost::system::error_code& ec)
     {
-        #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
-            if(storage.fDtrControl == DTR_CONTROL_ENABLE)
-                m_enable = true;
-            else
-                m_enable = true;
-        #else
-        #endif
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+        if(storage.fDtrControl == DTR_CONTROL_ENABLE)
+            m_enable = true;
+        else
+            m_enable = true;
+#else
+#endif
         return ec;
     };
 private:
@@ -83,28 +83,28 @@ public:
     boost::system::error_code store(BOOST_ASIO_OPTION_STORAGE& storage,
                                     boost::system::error_code& ec) const
     {
-        #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
-            if(m_enable)
-                storage.fRtsControl = RTS_CONTROL_ENABLE;
-            else
-                storage.fRtsControl = RTS_CONTROL_DISABLE;
-        #else
-            ec = boost::asio::error::operation_not_supported;
-            ec = boost::system::error_code();
-        #endif
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+        if(m_enable)
+            storage.fRtsControl = RTS_CONTROL_ENABLE;
+        else
+            storage.fRtsControl = RTS_CONTROL_DISABLE;
+#else
+        ec = boost::asio::error::operation_not_supported;
+        ec = boost::system::error_code();
+#endif
         return ec;
     };
     
     boost::system::error_code load(const BOOST_ASIO_OPTION_STORAGE& storage,
                                    boost::system::error_code& ec)
     {
-        #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
-            if(storage.fRtsControl == RTS_CONTROL_ENABLE)
-                m_enable = true;
-            else
-                m_enable = true;
-        #else
-        #endif
+#if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+        if(storage.fRtsControl == RTS_CONTROL_ENABLE)
+            m_enable = true;
+        else
+            m_enable = true;
+#else
+#endif
         return ec;
     };
 private:
@@ -124,7 +124,7 @@ Serial::Serial(std::string port,
                parity_t parity,
                stopbits_t stopbits,
                flowcontrol_t flowcontrol)
-               : io_service(), work(io_service), timeout_timer(io_service)
+    : io_service(), work(io_service), timeout_timer(io_service)
 {
     // Call default constructor to initialize variables
     this->init();
@@ -156,6 +156,8 @@ void Serial::init() {
     this->bytes_to_read = 0;
     this->reading = false;
     this->nonblocking = false;
+    this->continuouslyReading=false;
+    this->read_data=NULL;
 }
 
 Serial::~Serial() {
@@ -205,23 +207,23 @@ int Serial::read(char* buffer, int size) {
     this->reading = true;
     if(this->nonblocking) {// Do not wait for data
         this->serial_port->async_read_some(boost::asio::buffer(buffer, size),
-                                boost::bind(&Serial::read_complete, this,
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred));
+                                           boost::bind(&Serial::read_complete, this,
+                                                       boost::asio::placeholders::error,
+                                                       boost::asio::placeholders::bytes_transferred));
     } else {               // Wait for data until size is read or timeout occurs
         boost::asio::async_read(*this->serial_port, boost::asio::buffer(buffer, size), transfer_at_least_ignore_invalid_argument(size),
                                 boost::bind(&Serial::read_complete, this,
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred));
+                                            boost::asio::placeholders::error,
+                                            boost::asio::placeholders::bytes_transferred));
     }
     if(this->timeout > timeout_zero_comparison) { // Only set a timeout_timer if there is a valid timeout
         this->timeout_timer.expires_from_now(this->timeout);
         this->timeout_timer.async_wait(boost::bind(&Serial::timeout_callback, this,
-                                 boost::asio::placeholders::error));
+                                                   boost::asio::placeholders::error));
     } else if(this->nonblocking) {
         this->timeout_timer.expires_from_now(boost::posix_time::milliseconds(1));
         this->timeout_timer.async_wait(boost::bind(&Serial::timeout_callback, this,
-                                 boost::asio::placeholders::error));
+                                                   boost::asio::placeholders::error));
     }
     
     while(this->reading)
@@ -353,21 +355,21 @@ int Serial::getBaudrate() const {
 
 void Serial::setBytesize(bytesize_t bytesize) {
     switch(bytesize) {
-        case FIVEBITS:
-            this->bytesize = boost::asio::serial_port_base::character_size(5);
-            break;
-        case SIXBITS:
-            this->bytesize = boost::asio::serial_port_base::character_size(6);
-            break;
-        case SEVENBITS:
-            this->bytesize = boost::asio::serial_port_base::character_size(7);
-            break;
-        case EIGHTBITS:
-            this->bytesize = boost::asio::serial_port_base::character_size(8);
-            break;
-        default:
-            throw(InvalidBytesizeException(bytesize));
-            break;
+    case FIVEBITS:
+        this->bytesize = boost::asio::serial_port_base::character_size(5);
+        break;
+    case SIXBITS:
+        this->bytesize = boost::asio::serial_port_base::character_size(6);
+        break;
+    case SEVENBITS:
+        this->bytesize = boost::asio::serial_port_base::character_size(7);
+        break;
+    case EIGHTBITS:
+        this->bytesize = boost::asio::serial_port_base::character_size(8);
+        break;
+    default:
+        throw(InvalidBytesizeException(bytesize));
+        break;
     }
 }
 
@@ -377,90 +379,163 @@ bytesize_t Serial::getBytesize() const {
 
 void Serial::setParity(parity_t parity) {
     switch(parity) {
-        case PARITY_NONE:
-            this->parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none);
-            break;
-        case PARITY_ODD:
-            this->parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::odd);
-            break;
-        case PARITY_EVEN:
-            this->parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::even);
-            break;
-        default:
-            throw(InvalidParityException(parity));
-            break;
+    case PARITY_NONE:
+        this->parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none);
+        break;
+    case PARITY_ODD:
+        this->parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::odd);
+        break;
+    case PARITY_EVEN:
+        this->parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::even);
+        break;
+    default:
+        throw(InvalidParityException(parity));
+        break;
     }
 }
 
 parity_t Serial::getParity() const {
     switch(this->parity.value()) {
-        case boost::asio::serial_port_base::parity::none:
-            return parity_t(PARITY_NONE);
-        case boost::asio::serial_port_base::parity::odd:
-            return parity_t(PARITY_ODD);
-        case boost::asio::serial_port_base::parity::even:
-            return parity_t(PARITY_EVEN);
-        default:
-            throw(InvalidParityException(this->parity.value()));
+    case boost::asio::serial_port_base::parity::none:
+        return parity_t(PARITY_NONE);
+    case boost::asio::serial_port_base::parity::odd:
+        return parity_t(PARITY_ODD);
+    case boost::asio::serial_port_base::parity::even:
+        return parity_t(PARITY_EVEN);
+    default:
+        throw(InvalidParityException(this->parity.value()));
     }
 }
 
 void Serial::setStopbits(stopbits_t stopbits) {
     switch(stopbits) {
-        case STOPBITS_ONE:
-            this->stopbits = boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one);
-            break;
-        case STOPBITS_ONE_POINT_FIVE:
-            this->stopbits = boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::onepointfive);
-            break;
-        case STOPBITS_TWO:
-            this->stopbits = boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::two);
-            break;
-        default:
-            throw(InvalidStopbitsException(stopbits));
-            break;
+    case STOPBITS_ONE:
+        this->stopbits = boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one);
+        break;
+    case STOPBITS_ONE_POINT_FIVE:
+        this->stopbits = boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::onepointfive);
+        break;
+    case STOPBITS_TWO:
+        this->stopbits = boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::two);
+        break;
+    default:
+        throw(InvalidStopbitsException(stopbits));
+        break;
     }
 }
 
 stopbits_t Serial::getStopbits() const {
     switch(this->stopbits.value()) {
-        case boost::asio::serial_port_base::stop_bits::one:
-            return stopbits_t(STOPBITS_ONE);
-        case boost::asio::serial_port_base::stop_bits::onepointfive:
-            return stopbits_t(STOPBITS_ONE_POINT_FIVE);
-        case boost::asio::serial_port_base::stop_bits::two:
-            return stopbits_t(STOPBITS_TWO);
-        default:
-            throw(InvalidStopbitsException(this->stopbits.value()));
+    case boost::asio::serial_port_base::stop_bits::one:
+        return stopbits_t(STOPBITS_ONE);
+    case boost::asio::serial_port_base::stop_bits::onepointfive:
+        return stopbits_t(STOPBITS_ONE_POINT_FIVE);
+    case boost::asio::serial_port_base::stop_bits::two:
+        return stopbits_t(STOPBITS_TWO);
+    default:
+        throw(InvalidStopbitsException(this->stopbits.value()));
     }
 }
 
 void Serial::setFlowcontrol(flowcontrol_t flowcontrol) {
     switch(flowcontrol) {
-        case FLOWCONTROL_NONE:
-            this->flowcontrol = boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none);
-            break;
-        case FLOWCONTROL_SOFTWARE:
-            this->flowcontrol = boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::software);
-            break;
-        case FLOWCONTROL_HARDWARE:
-            this->flowcontrol = boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::hardware);
-            break;
-        default:
-            throw(InvalidFlowcontrolException(flowcontrol));
-            break;
+    case FLOWCONTROL_NONE:
+        this->flowcontrol = boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none);
+        break;
+    case FLOWCONTROL_SOFTWARE:
+        this->flowcontrol = boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::software);
+        break;
+    case FLOWCONTROL_HARDWARE:
+        this->flowcontrol = boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::hardware);
+        break;
+    default:
+        throw(InvalidFlowcontrolException(flowcontrol));
+        break;
     }
 }
 
 flowcontrol_t Serial::getFlowcontrol() const {
     switch(this->flowcontrol.value()) {
-        case boost::asio::serial_port_base::flow_control::none:
-            return flowcontrol_t(FLOWCONTROL_NONE);
-        case boost::asio::serial_port_base::flow_control::software:
-            return flowcontrol_t(FLOWCONTROL_SOFTWARE);
-        case boost::asio::serial_port_base::flow_control::hardware:
-            return flowcontrol_t(FLOWCONTROL_HARDWARE);
-        default:
-            throw(InvalidFlowcontrolException(this->flowcontrol.value()));
+    case boost::asio::serial_port_base::flow_control::none:
+        return flowcontrol_t(FLOWCONTROL_NONE);
+    case boost::asio::serial_port_base::flow_control::software:
+        return flowcontrol_t(FLOWCONTROL_SOFTWARE);
+    case boost::asio::serial_port_base::flow_control::hardware:
+        return flowcontrol_t(FLOWCONTROL_HARDWARE);
+    default:
+        throw(InvalidFlowcontrolException(this->flowcontrol.value()));
+    }
+}
+
+///////////////////////////////////////////////////////////////////////
+// Added by DWH 12-1-2011
+
+bool Serial::startContinuousRead(unsigned int bufferSize) {
+    // make sure buffer size is > 0
+    if (bufferSize<0) {
+        std::cout << "Serial: Buffer size must be > 0." << std::endl;
+    } else {
+        this->bufferSize=bufferSize;
+    }
+
+    // make sure timeout is non-zero, if it is 0 this
+    // thread will continuously poll the serial port
+    if (getTimeoutMilliseconds()==0) {
+        std::cout << "Serial: Cannot start continuous read with timeout of 0." << std::endl;
+        continuouslyReading=false;
+        return false;
+    }
+
+    // make sure a callback function has been set
+    if (read_data==NULL) {
+        std::cout << "Serial: A callback function must be set before starting continous reading." << std::endl;
+        continuouslyReading=false;
+        return false;
+    }
+
+	continuouslyReading=true;
+	// start thread
+	try {
+		mReadThread = boost::shared_ptr<boost::thread > (new boost::thread(boost::bind(&Serial::continuousRead, this)));
+    }  catch (std::exception &e) {
+        std::cout << "Error starting read thread: " << e.what() << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool Serial::stopContinuousRead(){
+	// signal thread to stop
+	continuouslyReading=false;
+    this->serial_port->cancel();
+
+	// wait for thread to stop - 1 sec wait time
+    if (mReadThread->timed_join( boost::posix_time::milliseconds(1000))) {
+        return true;
+	} else {
+        std::cout << "Read thread failed to stop." << std::endl;
+        return false;
+	}
+}
+
+void Serial::setReadCallback(DataReadCallback callback) {
+    // TODO: How do I make sure the callback is valid? Let exception in read thread catch it?
+    read_data=callback;
+}
+
+void Serial::continuousRead() {
+    char readBuffer[bufferSize];
+    int len=0;
+
+    try {
+        while(continuouslyReading){
+            // read from serial port
+            len=read(readBuffer,bufferSize);
+            // call callback
+            read_data((unsigned char*)readBuffer,len);
+        }
+    } catch(std::exception &e) {
+        std::cout << "Serial: Error in continuous read thread: " << e.what() << std::endl;
+        return;
     }
 }

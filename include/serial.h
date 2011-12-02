@@ -88,6 +88,8 @@ enum parity_t { PARITY_NONE, PARITY_ODD, PARITY_EVEN };
 enum stopbits_t { STOPBITS_ONE, STOPBITS_ONE_POINT_FIVE, STOPBITS_TWO };
 enum flowcontrol_t { FLOWCONTROL_NONE, FLOWCONTROL_SOFTWARE, FLOWCONTROL_HARDWARE };
 
+typedef boost::function<void(unsigned char*, unsigned int length)> DataReadCallback;
+
 class Serial {
 public:
     /** Constructor, Creates a Serial object but doesn't open the serial port. */
@@ -343,6 +345,25 @@ public:
     * @throw InvalidFlowcontrolException
     */
     flowcontrol_t getFlowcontrol() const;
+
+    // Continous reading methods - DWH - 12/1/2011
+    /** Starts continuous read thread. Read callback must be set first.
+     * @param bufferSize Maximum number of bytes to send to callback at a time
+     * @return True if reading is successfully started
+     */
+    bool startContinuousRead(unsigned int bufferSize);
+
+    /** Stops continous read thread.
+     * @return True if reading is successfully stopped.
+     */
+    bool stopContinuousRead();
+
+    /** Sets callback that is called when data is read from the serial port
+     * @param callback Boost function point to callback function
+     */
+    void setReadCallback(DataReadCallback callback);
+    // End continous reading methods
+
 private:
     DISALLOW_COPY_AND_ASSIGN(Serial);
     void init();
@@ -369,6 +390,15 @@ private:
     int bytes_to_read;
     bool reading;
     bool nonblocking;
+
+    // continuous reading members - DWH
+    boost::shared_ptr<boost::thread> mReadThread; //!< Boost thread for listening for data from serial port
+    void continuousRead(); //!< method to continously read from serial port
+    DataReadCallback read_data;	//!< callback function to be called when data is read
+    bool continuouslyReading; //!< determines if continous, blocking read is running
+    unsigned int bufferSize; //!< size of read buffer for continuous reading
+    // end continuous reading members
+
 };
 
 class SerialPortAlreadyOpenException : public std::exception {
