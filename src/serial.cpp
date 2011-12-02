@@ -3,6 +3,10 @@
 
 using namespace serial;
 
+inline void defaultReadDataCallback(unsigned char* buffer, unsigned int length) {
+    std::cerr << "Serial: Read " << length << " bytes." << std::endl;
+}
+
 /** Completion Conditions **/
 
 class transfer_at_least_ignore_invalid_argument {
@@ -157,7 +161,7 @@ void Serial::init() {
     this->reading = false;
     this->nonblocking = false;
     this->continuouslyReading=false;
-    this->read_data=NULL;
+    this->read_data=defaultReadDataCallback;
 }
 
 Serial::~Serial() {
@@ -482,13 +486,6 @@ bool Serial::startContinuousRead(unsigned int bufferSize) {
     // thread will continuously poll the serial port
     if (getTimeoutMilliseconds()==0) {
         std::cout << "Serial: Cannot start continuous read with timeout of 0." << std::endl;
-        continuouslyReading=false;
-        return false;
-    }
-
-    // make sure a callback function has been set
-    if (read_data==NULL) {
-        std::cout << "Serial: A callback function must be set before starting continous reading." << std::endl;
         continuouslyReading=false;
         return false;
     }

@@ -348,10 +348,10 @@ public:
 
     // Continous reading methods - DWH - 12/1/2011
     /** Starts continuous read thread. Read callback must be set first.
-     * @param bufferSize Maximum number of bytes to send to callback at a time
+     * @param bufferSize Maximum number of bytes to send to callback at a time (default=1)
      * @return True if reading is successfully started
      */
-    bool startContinuousRead(unsigned int bufferSize);
+    bool startContinuousRead(unsigned int bufferSize=1);
 
     /** Stops continous read thread.
      * @return True if reading is successfully stopped.
