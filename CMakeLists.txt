@@ -16,7 +16,7 @@ ENDIF(EXISTS /usr/bin/clang)
 ## Configurations
 
 option(SERIAL_BUILD_TESTS "Build all of the Serial tests." OFF)
-option(SERIAL_BUILD_EXAMPLES "Build all of the Serial examples." OFF)
+option(SERIAL_BUILD_EXAMPLES "Build all of the Serial examples." ON)
 
 # Allow for building shared libs override
 IF(NOT BUILD_SHARED_LIBS)
@@ -76,6 +76,10 @@ IF(SERIAL_BUILD_EXAMPLES)
     add_executable(serial_example examples/serial_example.cpp)
     # Link the Test program to the Serial library
     target_link_libraries(serial_example serial)
+    # Compile the continuous read test program
+    add_executable(serial_example_continuous examples/serial_example_continuous.cpp)
+    # Link the Test program to the Serial library
+    target_link_libraries(serial_example_continuous serial)
 ENDIF(SERIAL_BUILD_EXAMPLES)
 
 ## Build tests
