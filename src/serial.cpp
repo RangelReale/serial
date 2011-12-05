@@ -3,8 +3,8 @@
 
 using namespace serial;
 
-inline void defaultReadDataCallback(unsigned char* buffer, unsigned int length) {
-    std::cerr << "Serial: Read " << length << " bytes." << std::endl;
+inline void defaultReadDataCallback(std::string readData) {
+    std::cerr << "Serial: Read " << readData.length() << " bytes." << std::endl;
 }
 
 /** Completion Conditions **/
@@ -261,7 +261,7 @@ Serial::read_until(char delim, size_t size) {
 }
 
 std::string 
-Serial::read_until(std::string delim, size_t size) {
+Serial::read_until(std::string delim) {
     using namespace std;
     string r = "";
     
@@ -273,6 +273,7 @@ Serial::read_until(std::string delim, size_t size) {
     
     return r;
 }
+
 
 void Serial::read_complete(const boost::system::error_code& error, std::size_t bytes_transferred) {
     if(!error || error != boost::asio::error::operation_aborted) { // If there was no error OR the error wasn't operation aborted (canceled), Cancel the timer
@@ -473,8 +474,12 @@ flowcontrol_t Serial::getFlowcontrol() const {
 
 ///////////////////////////////////////////////////////////////////////
 // Added by DWH 12-1-2011
+bool Serial::startContinuousRead(unsigned int bufferSize, std::string delim) {
+    // make sure serial port is open
+    if (!isOpen()) {
+        std::cout << "Serial: Port must be open before starting continuous read." << std::endl;
+    }
 
-bool Serial::startContinuousRead(unsigned int bufferSize) {
     // make sure buffer size is > 0
     if (bufferSize<1) {
         std::cout << "Serial: Buffer size must be > 0." << std::endl;
@@ -498,6 +503,7 @@ bool Serial::startContinuousRead(unsigned int bufferSize) {
         std::cout << "Error starting read thread: " << e.what() << std::endl;
 		return false;
 	}
+    contDelim = delim;
 	return true;
 }
 
@@ -521,15 +527,23 @@ void Serial::setReadCallback(DataReadCallback callback) {
 }
 
 void Serial::continuousRead() {
-    char readBuffer[bufferSize];
-    int len=0;
+    std::string readData;
+
+    bool readUntil;
+    if (contDelim.length()==0)
+        readUntil=false;
+    else
+        readUntil=true;
 
     try {
         while(continuouslyReading){
             // read from serial port
-            len=read(readBuffer,bufferSize);
+            if (readUntil)
+                readData=read_until(contDelim);
+            else
+                readData=read(bufferSize);
             // call callback
-            read_data((unsigned char*)readBuffer,len);
+            read_data(readData);
         }
     } catch(std::exception &e) {
         std::cout << "Serial: Error in continuous read thread: " << e.what() << std::endl;

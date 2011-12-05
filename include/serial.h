@@ -88,7 +88,7 @@ enum parity_t { PARITY_NONE, PARITY_ODD, PARITY_EVEN };
 enum stopbits_t { STOPBITS_ONE, STOPBITS_ONE_POINT_FIVE, STOPBITS_TWO };
 enum flowcontrol_t { FLOWCONTROL_NONE, FLOWCONTROL_SOFTWARE, FLOWCONTROL_HARDWARE };
 
-typedef boost::function<void(unsigned char*, unsigned int length)> DataReadCallback;
+typedef boost::function<void(std::string readData)> DataReadCallback;
 
 class Serial {
 public:
@@ -178,7 +178,7 @@ public:
     std::string read(int size = 1);
     
     std::string read_until(char delim, size_t size = -1);
-    std::string read_until(std::string delim, size_t size = -1);
+    std::string read_until(std::string delim);
     
     /** Write length bytes from buffer to the serial port.
     * 
@@ -351,7 +351,7 @@ public:
      * @param bufferSize Maximum number of bytes to send to callback at a time (default=1)
      * @return True if reading is successfully started
      */
-    bool startContinuousRead(unsigned int bufferSize=1);
+    bool startContinuousRead(unsigned int bufferSize=1,std::string delim="\r");
 
     /** Stops continous read thread.
      * @return True if reading is successfully stopped.
@@ -397,6 +397,7 @@ private:
     DataReadCallback read_data;	//!< callback function to be called when data is read
     bool continuouslyReading; //!< determines if continous, blocking read is running
     unsigned int bufferSize; //!< size of read buffer for continuous reading
+    std::string contDelim;   //!< delimiter to break continuous reading on
     // end continuous reading members
 
 };

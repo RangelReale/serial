@@ -3,8 +3,8 @@
 
 #include "serial.h"
 
-inline void readDataCallback(unsigned char* buffer, unsigned int length) {
-    std::cerr << "Serial: Read " << length << " bytes." << " > " << buffer << std::endl;
+inline void readDataCallback(std::string readData) {
+    std::cerr << "Serial: Read " << readData.length() << " bytes." << " > " << readData << std::endl;
 }
 
 int main(int argc, char **argv)
