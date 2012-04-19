@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 
-#include "serial.h"
+#include "serial/serial.h"
 
 inline void readDataCallback(std::string readData) {
     std::cerr << "Serial: Read " << readData.length() << " bytes." << " > " << readData << std::endl;

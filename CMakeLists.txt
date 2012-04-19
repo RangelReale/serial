@@ -40,7 +40,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Add default source files
 set(SERIAL_SRCS src/serial.cpp)
 # Add default header files
-set(SERIAL_HEADERS include/serial.h)
+set(SERIAL_HEADERS include/serial/serial.h)
 
 # Find Boost, if it hasn't already been found
 IF(NOT Boost_FOUND OR NOT Boost_SYSTEM_FOUND OR NOT Boost_FILESYSTEM_FOUND OR NOT Boost_THREAD_FOUND)
@@ -104,7 +104,7 @@ IF(NOT SERIAL_DONT_CONFIGURE_INSTALL)
       ARCHIVE DESTINATION lib
     )
     
-    INSTALL(FILES include/serial.h DESTINATION include)
+    INSTALL(FILES include/serial/serial.h DESTINATION include)
     
     IF(NOT CMAKE_FIND_INSTALL_PATH)
         set(CMAKE_FIND_INSTALL_PATH ${CMAKE_ROOT})
