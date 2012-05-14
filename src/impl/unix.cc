@@ -386,29 +386,33 @@ Serial::SerialImpl::read (unsigned char *buf, size_t size)
   total_timeout.tv_sec = total_timeout_ms / 1000;
   total_timeout.tv_usec = static_cast<int>(total_timeout_ms % 1000);
   total_timeout.tv_usec *= 1000; // To convert to micro seconds
+  // Setup the inter byte timeout
+  struct timeval inter_byte_timeout;
+  inter_byte_timeout.tv_sec = timeout_.inter_byte_timeout / 1000;
+  inter_byte_timeout.tv_usec =
+    static_cast<int> (timeout_.inter_byte_timeout % 1000);
+  inter_byte_timeout.tv_usec *= 1000; // To convert to micro seconds
   while (bytes_read < size) {
-    // Setup the inter_byte timeout timeval
-    struct timeval timeout; // Inter-byte timeout
-    timeout.tv_sec = timeout_.inter_byte_timeout / 1000;
-    timeout.tv_usec = static_cast<int> (timeout_.inter_byte_timeout % 1000);
-    timeout.tv_usec *= 1000; // To convert to micro seconds
+    // Setup the select timeout timeval
+    struct timeval timeout;
+    // If the total_timeout is less than the inter_byte_timeout
+    if (total_timeout.tv_sec < inter_byte_timeout.tv_sec
+     || (total_timeout.tv_sec == inter_byte_timeout.tv_sec
+      && total_timeout.tv_usec < inter_byte_timeout.tv_sec))
+    {
+      // Then set the select timeout to use the total time
+      timeout = total_timeout;
+    } else {
+      // Else set the select timeout to use the inter byte time
+      timeout = inter_byte_timeout;
+    }
     FD_ZERO (&readfds);
     FD_SET (fd_, &readfds);
     // Begin timing select
     struct timespec start, end;
     get_time_now (start);
-    int r;
-    // If the total_timeout is less than the inter_byte_timeout
-    if (total_timeout.tv_sec < timeout.tv_sec
-     || (total_timeout.tv_sec == timeout.tv_sec
-      && total_timeout.tv_usec < timeout.tv_sec))
-    {
-      // Use the total_timeout
-      r = select (fd_ + 1, &readfds, NULL, NULL, &total_timeout);
-    } else {
-      // Else use the inter_byte_timeout
-      r = select (fd_ + 1, &readfds, NULL, NULL, &timeout);
-    }
+    // Call select to block for serial data or a timeout
+    int r = select (fd_ + 1, &readfds, NULL, NULL, &timeout);
     // Calculate difference and update the structure
     get_time_now (end);
     // Calculate the time select took
@@ -707,7 +711,7 @@ Serial::SerialImpl::getDSR ()
 }
 
 bool
-Serial::SerialImpl::getRI()
+Serial::SerialImpl::getRI ()
 {
   if (is_open_ == false) {
     throw PortNotOpenedException ("Serial::getRI");
@@ -717,7 +721,7 @@ Serial::SerialImpl::getRI()
 }
 
 bool
-Serial::SerialImpl::getCD()
+Serial::SerialImpl::getCD ()
 {
   if (is_open_ == false) {
     throw PortNotOpenedException ("Serial::getCD");
@@ -727,7 +731,7 @@ Serial::SerialImpl::getCD()
 }
 
 void
-Serial::SerialImpl::readLock()
+Serial::SerialImpl::readLock ()
 {
   int result = pthread_mutex_lock(&this->read_mutex);
   if (result) {
@@ -736,7 +740,7 @@ Serial::SerialImpl::readLock()
 }
 
 void
-Serial::SerialImpl::readUnlock()
+Serial::SerialImpl::readUnlock ()
 {
   int result = pthread_mutex_unlock(&this->read_mutex);
   if (result) {
@@ -745,7 +749,7 @@ Serial::SerialImpl::readUnlock()
 }
 
 void
-Serial::SerialImpl::writeLock()
+Serial::SerialImpl::writeLock ()
 {
   int result = pthread_mutex_lock(&this->write_mutex);
   if (result) {
@@ -754,7 +758,7 @@ Serial::SerialImpl::writeLock()
 }
 
 void
-Serial::SerialImpl::writeUnlock()
+Serial::SerialImpl::writeUnlock ()
 {
   int result = pthread_mutex_unlock(&this->write_mutex);
   if (result) {
