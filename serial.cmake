@@ -69,7 +69,7 @@ macro(build_serial)
 
   set(OTHER_LIBS "")
   if(UNIX)
-    set(OTHER_LIBS util)
+    set(OTHER_LIBS util rt)
   endif(UNIX)
   
   ## Build the Serial Library
