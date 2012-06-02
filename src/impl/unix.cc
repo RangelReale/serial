@@ -496,6 +496,16 @@ Serial::SerialImpl::write (const string &data)
   return static_cast<size_t> (::write (fd_, data.c_str (), data.length ()));
 }
 
+size_t
+  Serial::SerialImpl::write (const unsigned char *data, size_t size) 
+{
+  if (is_open_ == false) {
+    throw PortNotOpenedException ("Serial::write");
+  }
+  return static_cast<size_t> (::write (fd_, data, size)); 
+}
+
+
 void
 Serial::SerialImpl::setPort (const string &port)
 {

@@ -213,6 +213,13 @@ Serial::write (const string &data)
   return pimpl_->write (data);
 }
 
+size_t
+Serial::write (const unsigned char *data, size_t size)
+{
+  ScopedWriteLock(this->pimpl_);
+  return pimpl_->write (data,size);  
+}
+
 void
 Serial::setPort (const string &port)
 {

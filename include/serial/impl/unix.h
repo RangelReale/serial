@@ -79,6 +79,9 @@ public:
   size_t
   write (const string &data);
 
+  size_t
+  write (const unsigned char *data, size_t size);
+
   void
   flush ();
 
