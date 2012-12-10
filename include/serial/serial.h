@@ -644,21 +644,11 @@ class IOException : public std::exception
   const IOException& operator=(IOException);
   std::string file_;
   int line_;
-  const char* e_what_;
+  std::string e_what_;
+  std::string e_message_;
   int errno_;
-public:
-  explicit IOException (std::string file, int line, int errnum)
-  : file_(file), line_(line), e_what_ (strerror (errnum)), errno_(errnum) {}
-  explicit IOException (std::string file, int line, const char * description)
-  : file_(file), line_(line), e_what_ (description), errno_(0) {}
-  virtual ~IOException() throw() {}
-  IOException (const IOException& other) {
-    e_what_ = other.e_what_;
-  }
 
-  int getErrorNumber () { return errno_; }
-
-  virtual const char* what () const throw ()
+  void formatmessage()
   {
     std::stringstream ss;
     if (errno_ == 0)
@@ -666,7 +656,24 @@ public:
     else
       ss << "IO Exception (" << errno_ << "): " << e_what_;
     ss << ", file " << file_ << ", line " << line_ << ".";
-    return ss.str ().c_str ();
+    e_message_ = ss.str();
+  }
+public:
+  explicit IOException (std::string file, int line, int errnum)
+  : file_(file), line_(line), e_what_ (strerror (errnum)), errno_(errnum) {formatmessage();}
+  explicit IOException (std::string file, int line, const char * description)
+  : file_(file), line_(line), e_what_ (description), errno_(0) {formatmessage();}
+  virtual ~IOException() throw() {}
+  IOException (const IOException& other) {
+    e_what_ = other.e_what_;
+	formatmessage();
+  }
+
+  int getErrorNumber () { return errno_; }
+
+  virtual const char* what () const throw ()
+  {
+	  return e_message_.c_str();
   }
 };
 
@@ -675,18 +682,25 @@ class PortNotOpenedException : public std::exception
   // Disable copy constructors
   void operator=(const PortNotOpenedException&);
   const PortNotOpenedException& operator=(PortNotOpenedException);
-  const char * e_what_;
+  std::string e_what_;
+  std::string e_message_;
+
+  void formatmessage()
+  {
+    std::stringstream ss;
+    ss << e_what_ << " called before port was opened.";
+    e_message_ = ss.str();
+  }
 public:
-  PortNotOpenedException (const char * description) : e_what_ (description) {}
+  PortNotOpenedException (const char * description) : e_what_ (description) {formatmessage();}
   PortNotOpenedException (const PortNotOpenedException& other) {
     e_what_ = other.e_what_;
+	formatmessage();
   }
 
   virtual const char* what () const throw ()
   {
-    std::stringstream ss;
-    ss << e_what_ << " called before port was opened.";
-    return ss.str ().c_str ();
+	  return e_message_.c_str();
   }
 };
 
