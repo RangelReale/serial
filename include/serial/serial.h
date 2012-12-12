@@ -697,6 +697,7 @@ public:
     e_what_ = other.e_what_;
 	formatmessage();
   }
+  virtual ~PortNotOpenedException() throw() {}
 
   virtual const char* what () const throw ()
   {
