@@ -1,6 +1,10 @@
 /* Copyright 2012 William Woodall and John Harrison */
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OpenBSD__)
 # include <alloca.h>
+#endif
+
+#if defined (__MINGW32__)
+# define alloca __builtin_alloca
 #endif
 
 #include "serial/serial.h"
@@ -19,7 +23,7 @@ using std::size_t;
 using std::string;
 
 using serial::Serial;
-using serial::SerialExecption;
+using serial::SerialException;
 using serial::IOException;
 using serial::bytesize_t;
 using serial::parity_t;
@@ -37,7 +41,6 @@ public:
 private:
   // Disable copy constructors
   ScopedReadLock(const ScopedReadLock&);
-  void operator=(const ScopedReadLock&);
   const ScopedReadLock& operator=(ScopedReadLock);
 
   SerialImpl *pimpl_;
@@ -54,7 +57,6 @@ public:
 private:
   // Disable copy constructors
   ScopedWriteLock(const ScopedWriteLock&);
-  void operator=(const ScopedWriteLock&);
   const ScopedWriteLock& operator=(ScopedWriteLock);
   SerialImpl *pimpl_;
 };

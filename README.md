@@ -1,105 +1,68 @@
 # Serial Communication Library
 
-## Note about Repository Changes
+This is a cross-platform library for interfacing with rs-232 serial like ports written in C++. It provides a modern C++ interface with a workflow designed to look and feel like PySerial, but with the speed and control provided by C++. 
 
-If you had the serial library checked previously and now those settings seem broken, it is because I recently reorganized the serial repository.  I wanted these checkouts to break so that you were forced to update.
+This library is in use in several robotics related projects and can be built and installed to the OS like most unix libraries with make and then sudo make install, but because it is a catkin project it can also be built along side other catkin projects in a catkin workspace.
 
-If you previously were using the `master` branch, that version is now under the git tag `v0.1`.
+Serial is a class that provides the basic interface common to serial libraries (open, close, read, write, etc..) and requires no extra dependencies. It also provides tight control over timeouts and control over handshaking lines. 
 
-If you were previously using the `boostless` branch, that version is now tagged as `v0.2` or `boostless`.
+### Documentation
 
-If you were previously using the `new_api` branch, that has become the new `master` branch and is also tagged `v1.0`.
+Website: http://wjwwood.github.com/serial/
 
-## Documentation
+API Documentation: http://wjwwood.github.com/serial/doc/1.1.0/index.html
 
-http://wjwwood.github.com/serial/docs/v1.0/index.html
+### Dependencies
 
-## Dependencies
+* [catkin](http://www.ros.org/wiki/catkin) - cmake and Python based buildsystem
+ * [cmake](http://www.cmake.org) - buildsystem
+ * [Python](http://www.python.org) - scripting language
+ * [empy](http://www.alcyone.com/pyos/empy/) - Python templating library
+ * [catkin_pkg](http://pypi.python.org/pypi/catkin_pkg/) - Runtime Python library for catkin
 
-* CMake, for the build system: http://www.cmake.org/
-* (Optional) ROS: http://ros.org/wiki
+### Install
 
-## Stand Alone Installation
+Get the code:
 
-Get the source:
+    git clone https://github.com/wjwwood/serial.git
 
-    git clone git://github.com/wjwwood/serial.git
-    cd serial
-
-Compile the code:
-
-    make
-
-Or run cmake youself:
-
-    mkdir build && cd build
-    cmake ..
-    make
-
-Install the code (UNIX):
+Build:
 
     make
-    sudo make install
 
-Uninstall the code (UNIX):
+Build and run the tests:
 
-    make
-    sudo make uninstall
+    make test
 
 Build the documentation:
 
-    Comming Soon!
+    make docs
 
-## Using within ROS workspace
+Install:
 
-Setup workspace (skip if you already have one):
+    make install
 
-    mkdir some_ros_workspace
-    cd some_ros_workspace
-    rosws init . /opt/ros/fuerte # Replace the path here
-    source setup.bash
+Uninstall:
 
-Add the serial unary stack to your ROS workspace:
-    
-    rosws merge https://raw.github.com/wjwwood/serial/80c0/serial.rosinstall
-    
-Rerun rosinstall to fetch it:
-    
-    rosinstall .
-    source setup.bash
+    make uninstall
 
-Build the unary stack:
+### License
 
-    rosmake serial --rosdep-install
+The MIT License
 
-Run the example:
+Copyright (c) 2012 William Woodall, John Harrison
 
-    rosrun serial serial_example
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-Use it in your ROS pkg by adding this line to your `manifest.xml`:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-    <depend package="serial" />
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## License
+### Authors
 
-The BSD License
+William Woodall <wjwwood@gmail.com>
+John Harrison <ash.gti@gmail.com>
 
-Copyright (c) 2012 William Woodall
+### Contact
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+William Woodall <william@osrfoundation.org>
