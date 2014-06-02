@@ -23,6 +23,12 @@ macro(build_serial)
     endif()
   endif(UNIX)
 
+  # must add -fPIC in Linux 64
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  ENDIF()
+
   IF(NOT DEFINED BUILD_NO_CLANG)
     option(BUILD_NO_CLANG "Do not use the Clang compiler." OFF)
   ENDIF(NOT DEFINED BUILD_NO_CLANG)
