@@ -14,6 +14,7 @@
 *.out
 .svn
 build
+buildrel
 bin
 lib
 cpp

@@ -11,15 +11,21 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#ifndef ANDROID
 #include <sys/signal.h>
+#else
+#include <signal.h>
+#endif
 #include <errno.h>
 #include <paths.h>
+#ifndef ANDROID
 #include <sysexits.h>
+#endif
 #include <termios.h>
 #include <sys/param.h>
 #include <pthread.h>
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(ANDROID)
 # include <linux/serial.h>
 #endif
 
@@ -43,6 +49,11 @@
 
 #if defined(MAC_OS_X_VERSION_10_3) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_3)
 #include <IOKit/serial/ioss.h>
+#endif
+
+/* Android is missing tcdrain, so use ioctl version instead */
+#ifdef ANDROID
+#define tcdrain(x) ioctl(x, TCSBRK, 1)
 #endif
 
 using std::string;
@@ -308,7 +319,7 @@ Serial::SerialImpl::reconfigurePort ()
       THROW (IOException, errno);
     }
     // Linux Support
-#elif defined(__linux__) && defined (TIOCSSERIAL)
+#elif defined(__linux__) &&!defined(ANDROID) && defined (TIOCSSERIAL)
     struct serial_struct ser;
 
     if (-1 == ioctl (fd_, TIOCGSERIAL, &ser)) {
