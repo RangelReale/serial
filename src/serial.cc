@@ -7,6 +7,8 @@
 # define alloca __builtin_alloca
 #endif
 
+#include <algorithm>
+
 #include "serial/serial.h"
 
 #ifdef _WIN32
